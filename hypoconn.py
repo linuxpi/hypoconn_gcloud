@@ -30,6 +30,7 @@ class LoginPage(webapp2.RequestHandler):
         password = self.request.get('password')
         token_scraper = TokenScraper(username, password)
         template_context = {}
+        
         try:
             token = token_scraper.login_and_get_token()
         except Exception as e:
