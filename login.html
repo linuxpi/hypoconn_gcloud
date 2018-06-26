@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <head>
+    <!-- [START css] -->
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css">
+    <!-- [END css] -->
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        background-color: #f5f5f5;
+      }
+      blockquote {
+        margin-bottom: 10px;
+        border-left-color: #bbb;
+      }
+      form {
+        margin-top: 10px;
+      }
+      .form-signin input[type="text"] {
+        font-size: 16px;
+        height: auto;
+        margin-bottom: 15px;
+        padding: 7px 9px;
+      }
+      .row {
+        margin-left: 0px;
+        margin-top: 10px;
+        overflow: scroll;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Hypoconn Login</a>
+          <!-- <div class="nav-collapse collapse pull-right">
+            <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
+          </div> -->
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <form action="/hypoconn/login" method="post">
+        <div><input required type='text' name="username" class="col-4" placeholder="username"></textarea></div>
+        <div><input required type='password' name="password" class="col-4" placeholder="password"></textarea></div>
+        <div><input type="submit" class="btn btn-large btn-primary" value="sign in"></div>
+      </form>
+
+      <hr>
+    
+      {% if token %}
+        <div>
+            Sucessfully Logged in!
+        </div>
+      {% endif %}
+
+      {% if error %}
+        <div>
+            Error while logging in with hypothes.is
+            <br>
+            Details: <b>{{ error }}</b>
+        </div>
+      {% endif %}
+
+      <a href="{{ url|safe }}">{{ url_linktext }}</a>
+    </div>
+  </body>
+</html>
+{% endautoescape %}

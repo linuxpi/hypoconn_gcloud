@@ -12,7 +12,7 @@ handlers:
   static_dir: bootstrap
 
 - url: /.*
-  script: guestbook.app
+  script: hypoconn.application
 # [END handlers]
 
 # [START libraries]
