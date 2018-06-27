@@ -2,20 +2,18 @@ import os
 import json
 import webapp2
 import jinja2
-import requests
+
+from google.appengine.ext import ndb
+from google.appengine.api import urlfetch
+from google.appengine.api import memcache
+
 import requests_toolbelt.adapters.appengine
 
 # Use the App Engine Requests adapter. This makes sure that Requests uses
 # URLFetch.
 requests_toolbelt.adapters.appengine.monkeypatch()
 
-import mechanicalsoup
 from utilities.token_scraper import TokenScraper
-
-from google.appengine.ext import ndb
-from google.appengine.api import urlfetch
-from google.appengine.api import memcache
-
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -141,6 +139,7 @@ class SaveAnnotationPage(webapp2.RequestHandler):
             saved_annotation.put()
         self.redirect('/hypoconn/save')
 
+
 def check_or_fetch_data(key, request_data):
     data = memcache.get(key)
     if data is None:
@@ -157,6 +156,7 @@ def check_or_fetch_data(key, request_data):
 def get_auth_headers(urlsafe_key):
     user = ndb.Key(urlsafe=urlsafe_key).get() if urlsafe_key else None
     return {'Authorization': user.api_token} if user else None
+
 
 application = webapp2.WSGIApplication([
     ('/hypoconn/save', SaveAnnotationPage),
