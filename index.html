@@ -53,8 +53,9 @@
     <div class="container">
       {% for annotation in annotations %}
       <div class="row">
+        <b>{{ annotation.user.split(':')[-1].split('@')[0] }}</b>
         {% if annotation.group %}
-          <b>{{ annotation.group }}</b>
+          in <i>{{ annotation.group }}</i>
         {% endif %}
         <blockquote>{{ annotation.text }}</blockquote>
         <div>
