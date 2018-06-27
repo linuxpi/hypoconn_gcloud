@@ -37,12 +37,14 @@ class UserToken(ndb.Model):
 class LoginPage(webapp2.RequestHandler):
 
     def get(self):
+        self.response.delete_cookie('token')
         tempate = JINJA_ENVIRONMENT.get_template('login.html')
         self.response.write(tempate.render({}))
 
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
+
         token_scraper = TokenScraper(username, password)
         template_context = {}
 
@@ -52,10 +54,14 @@ class LoginPage(webapp2.RequestHandler):
             template_context['error'] = e.message
         else:
             template_context['token'] = True
-            usertoken = UserToken(
-                username=username, 
-                api_token=token,
-            )
+            usertoken = UserToken.query(UserToken.username==username).get()
+            if usertoken:
+                usertoken.api_token = token
+            else:
+                usertoken = UserToken(
+                    username=username,
+                    api_token=token
+                )
             usertoken.put()
             self.response.set_cookie('token', usertoken.key.urlsafe())
             self.redirect('/hypoconn')
@@ -67,23 +73,24 @@ class ListPage(webapp2.RequestHandler):
 
     def get(self):
         headers = get_auth_headers(self.request.cookies.get('token'))
-        if not headers:
-            self.request.cookies.delete('token')
+        if headers is None:
+            self.response.delete_cookie('token')
             self.redirect('/hypoconn/login')
-        is_valid, annotations = check_or_fetch_data(
-            'annotations', 
-            {
-                'url': ANNOTATIONS_SEARCH_URL,
-                'headers': headers,
-            })
-        if is_valid:
-            self.response.write(
-                JINJA_ENVIRONMENT.get_template('index.html').render({
-                    'annotations': annotations
-                })
-            )
         else:
-            self.response.write(annotations)
+            is_valid, annotations = check_or_fetch_data(
+                'annotations', 
+                {
+                    'url': ANNOTATIONS_SEARCH_URL,
+                    'headers': headers,
+                })
+            if is_valid:
+                self.response.write(
+                    JINJA_ENVIRONMENT.get_template('index.html').render({
+                        'annotations': annotations
+                    })
+                )
+            else:
+                self.response.write(annotations)
 
 
 def check_or_fetch_data(key, request_data):
@@ -93,14 +100,14 @@ def check_or_fetch_data(key, request_data):
             response = urlfetch.fetch(**request_data)
         except urlfetch.Error:
             return False, 'Error while fetching data from the api. Please refresh to retry!'
-        finally:
+        else:
             data = json.loads(response.content).get('rows')
             memcache.add(key=key, value=data, time=900)
     return True, data
 
 
 def get_auth_headers(urlsafe_key):
-    user = ndb.Key(urlsafe=urlsafe_key).get()
+    user = ndb.Key(urlsafe=urlsafe_key).get() if urlsafe_key else None
     return {'Authorization': user.api_token} if user else None
 
 application = webapp2.WSGIApplication([
