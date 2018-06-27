@@ -45,7 +45,10 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="brand" href="#">Hypothes.is</a>
+          <a class="brand" href="{% if world_view %}#{% else %}/{% endif %}">Hypothes.is</a>
+          {%if not world_view %}
+            <a class="brand"> saved annotations</a>
+          {% endif %}
           <a class="pull-right btn btn-secondary" href="/hypoconn/login">Logout</a>
         </div>
       </div>
@@ -66,6 +69,14 @@
         <div class="link-container">
           <a href="{{ annotation.uri|safe }}">Go to link</a>
         </div>
+        {% if world_view %}
+          <div>
+            <form action="/hypoconn/save" method="post">
+              <input type="hidden" name="id" value="{{annotation.id}}" />
+              <input type="submit" value="Save" />
+            </form>
+          </div>
+        {% endif %}
       </div>
       <br>
       {% endfor %}
