@@ -64,7 +64,7 @@ class LoginPage(webapp2.RequestHandler):
                 )
             usertoken.put()
             self.response.set_cookie('token', usertoken.key.urlsafe())
-            self.redirect('/hypoconn')
+            self.redirect('/')
         tempate = JINJA_ENVIRONMENT.get_template('login.html')
         self.response.write(tempate.render(template_context))
 
@@ -112,5 +112,5 @@ def get_auth_headers(urlsafe_key):
 
 application = webapp2.WSGIApplication([
     ('/hypoconn/login', LoginPage),
-    ('/hypoconn', ListPage)
+    ('/', ListPage)
 ], debug=True)
