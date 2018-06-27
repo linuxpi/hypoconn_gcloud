@@ -4,3 +4,9 @@ indexes:
   properties:
   - name: date
     direction: desc
+
+- kind: SavedAnnotation
+  ancestor: yes
+  properties:
+  - name: added
+    direction: desc
