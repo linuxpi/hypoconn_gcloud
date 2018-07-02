@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <head>
+    <!-- [START css] -->
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css">
+    <!-- [END css] -->
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        background-color: #f5f5f5;
+      }
+      .row {
+        margin-left: 0px;
+        margin-top: 50px;
+        overflow: hidden;
+        display: inline-block;
+        max-height: 240px;
+      }
+      .user-back-img {
+        max-height: 300px;
+        width: 100%;
+      }
+      .user-avatar {
+        margin-top: -50px;
+      }
+      .user-detail, .user-avatar {
+        margin-left: 50px;
+      }
+      .video-detail {
+        width: 70%;
+        display: inline-block;
+        vertical-align: top;
+      }
+      .video-player{
+        width: 28%;
+        display: inline-block;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="user-details">
+        <div class="user-background">
+          <img class="user-back-img" src="{{background_image}}"/>
+        </div>
+        <div class="user-avatar">
+          <img src="{{avatar}}" width="100px"/>
+        </div>
+        <div class="user-detail">
+          <p>Name: {{name}}</p>
+          <p>About: {{about_me}}</p>
+        </div>
+      </div>
+      {% for item in items %}
+      <div class="row">
+        {% set data = item.contentDetails %}
+          {% if data.upload %}
+            <iframe class="video-player" width="320" height="240"
+                    src="https://www.youtube.com/embed/{{data.upload.videoId}}">
+            </iframe>
+            <div class="video-detail">
+              <h3><span>{{item.snippet.title}}</span></h3>
+              <p>{{item.snippet.publishedAt.split('T')[0] }}</p>
+              <p>{{item.snippet.description}}</p>
+            </div>
+          {% elif data.subscription.resourceId %}
+            <!--<div class="subscription-detail">-->
+              <!--<span>Subscribed to </span> :-->
+              <!--<a href="https://www.youtube.com/channel/{{data.subscription.resourceId.channelId}}">-->
+                <!--{{item.snippet.channelTitle}}-->
+              <!--</a>-->
+            <!--</div>-->
+          {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
+{% endautoescape %}
