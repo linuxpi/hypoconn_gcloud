@@ -40,8 +40,11 @@ def get_activities(**kwargs):
 
 
 def get_app_thumbnail(pkg_name):
-    response = urlfetch.fetch(url='https://cloud.bluestacks.com/app/icon?pkg={}'.format(pkg_name))
-    return response.final_url
+    response = urlfetch.fetch(
+        url='https://cloud.bluestacks.com/app/icon?pkg={}'.format(pkg_name),
+        follow_redirects=False
+    )
+    return response.headers['location']
 
 
 class ListPage(webapp2.RequestHandler):
