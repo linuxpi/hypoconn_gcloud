@@ -8,7 +8,6 @@
     <!-- [END css] -->
     <style type="text/css">
       body {
-        padding-top: 40px;
         padding-bottom: 40px;
         background-color: #f5f5f5;
       }
@@ -23,11 +22,21 @@
         max-height: 300px;
         width: 100%;
       }
-      .user-avatar {
-        margin-top: -50px;
-      }
-      .user-detail, .user-avatar {
+      .user-personal {
+        margin-top: -75px;
         margin-left: 50px;
+        width: 50%;
+        display: inline-block;
+      }
+      .user-apps {
+        margin-top: 15px;
+        vertical-align: top;
+      }
+      .user-apps{
+        display: inline-block;
+      }
+      .user-detail {
+        display: inline-block;
       }
       .video-detail {
         width: 70%;
@@ -39,7 +48,26 @@
         display: inline-block;
         vertical-align: top;
       }
+      .apps-container {
+        margin-top: 5px;
+      }
+      .apps-container img {
+        margin: 0 7px 0 0;
+      }
     </style>
+    <!--<script type="application/javascript">-->
+      <!--function getThumbnail(pkgName, element) {-->
+          <!--var xhr = new XMLHttpRequest();-->
+          <!--xhr.onreadystatechange = function (data) {-->
+              <!--if (this.readyState === 4 && this.status === 200) {-->
+                  <!--console.log(data, 'data');-->
+              <!--}-->
+          <!--};-->
+          <!--xhr.open('GET','https://cloud.bluestacks.com/app/icon?pkg='+pkgName, true);-->
+          <!--xhr.send();-->
+          <!--return 'https://lh3.googleusercontent.com/mQlfyhcvl66lTLBxa-Y8SI4QJ365DGYE4SjOWxZ3hR34xPpu4toxVPm4Y5a86Butog=w150'-->
+      <!--}-->
+    <!--</script>-->
   </head>
   <body>
     <div class="container">
@@ -47,12 +75,24 @@
         <div class="user-background">
           <img class="user-back-img" src="{{background_image}}"/>
         </div>
-        <div class="user-avatar">
-          <img src="{{avatar}}" width="100px"/>
+        <div class="user-personal">
+          <div class="user-avatar">
+            <img src="{{avatar}}" width="150px"/>
+          </div>
+          <div class="user-detail">
+            <h3><p>I'm {{name}}</p></h3>
+            <h5><p>{{about_me}}</p></h5>
+          </div>
         </div>
-        <div class="user-detail">
-          <p>Name: {{name}}</p>
-          <p>About: {{about_me}}</p>
+        <div class="user-apps">
+          <b><span>Apps I like</span></b>
+          <div class="apps-container">
+            {% for app in liked_apps %}
+              <a href="https://play.google.com/store/apps/details?id={{app}}" target="_blank">
+                <img src="{{liked_apps[app]}}" width="60px" height="60px">
+              </a>
+            {% endfor %}
+          </div>
         </div>
       </div>
       {% for item in items %}

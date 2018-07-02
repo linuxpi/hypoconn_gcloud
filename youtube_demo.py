@@ -39,9 +39,16 @@ def get_activities(**kwargs):
     return youtube_data.json_data
 
 
+def get_app_thumbnail(pkg_name):
+    response = urlfetch.fetch(url='https://cloud.bluestacks.com/app/icon?pkg={}'.format(pkg_name))
+    return response.final_url
+
+
 class ListPage(webapp2.RequestHandler):
 
     def get(self):
+        liked_apps = ['com.igg.android.lordsmobile', 'com.funplus.kingofavalon',
+                      'com.diandian.gog', 'com.ea.gp.candcwarzones']
         data = get_activities(
             payload={
                 'channelId': 'UCIvBHgnnLSVr9enuPvBuwyw',
@@ -57,6 +64,7 @@ class ListPage(webapp2.RequestHandler):
             'avatar': 'https://api.adorable.io/avatars/248/blue%40adorable.io',
             'background_image': 'https://image.ibb.co/dxi7SJ/background_sample.png',
             'about_me': 'I love Bluestacks <3',
+            'liked_apps': {pkg_name: get_app_thumbnail(pkg_name) for pkg_name in liked_apps}
         }))
 
 
