@@ -6,6 +6,7 @@ import urllib
 
 from google.appengine.ext import ndb
 from google.appengine.api import urlfetch
+from google.appengine.api import memcache
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -16,6 +17,8 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 BASE_URL = 'https://www.googleapis.com/youtube/v3'
 ACTIVITIES_URL = '/activities'
 KEY = 'AIzaSyCafUQ9rlkZvgOJ0yH4m8Yr7_cW-mhm7Us'
+
+SECONDS_IN_DAY = 24*3600
 
 
 class YoutubeData(ndb.Model):
@@ -40,11 +43,15 @@ def get_activities(**kwargs):
 
 
 def get_app_thumbnail(pkg_name):
-    response = urlfetch.fetch(
-        url='https://cloud.bluestacks.com/app/icon?pkg={}'.format(pkg_name),
-        follow_redirects=False
-    )
-    return response.headers['location']
+    thumb_url = memcache.get(key=pkg_name)
+    if not thumb_url:
+        response = urlfetch.fetch(
+            url='https://cloud.bluestacks.com/app/icon?pkg={}'.format(pkg_name),
+            follow_redirects=False
+        )
+        memcache.add(key=pkg_name, value=response.headers['location'], time=SECONDS_IN_DAY)
+        return response.headers['location']
+    return thumb_url
 
 
 class ListPage(webapp2.RequestHandler):
