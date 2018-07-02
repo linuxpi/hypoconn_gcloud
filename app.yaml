@@ -12,7 +12,7 @@ handlers:
   static_dir: bootstrap
 
 - url: /.*
-  script: hypoconn.application
+  script: stripe_demo.application
 # [END handlers]
 
 # [START libraries]

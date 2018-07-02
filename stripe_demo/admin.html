@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <head>
+    <!-- [START css] -->
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css">
+    <!-- [END css] -->
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        background-color: #f5f5f5;
+      }
+      blockquote {
+        margin-bottom: 10px;
+        border-left-color: #bbb;
+      }
+      form {
+        margin-top: 10px;
+      }
+      .form-signin input[type="text"] {
+        font-size: 16px;
+        height: auto;
+        margin-bottom: 15px;
+        padding: 7px 9px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Stripe Demo</a>
+        </div>
+      </div>
+    </div>
+    <div>
+        <a href="/">Items</a>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+      <table class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Item</th>
+              <th scope="col">Transaction</th>
+              <th scope="col">Dispute</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions %}
+                <tr>
+                  <td>{{transaction.key.parent().get().name}}</td>
+                  <td><a href="https://dashboard.stripe.com/test/payments/{{transaction.charge_id}}">{{transaction.charge_id}}</a></td>
+                  <td><a href="https://dashboard.stripe.com/test/payments/{{transaction.charge_id}}">
+                    {% if transaction.dispute %}
+                      {% set dispute = transaction.dispute.get() %}
+                      {{dispute.status.split('.')[-1]}} <i>due to</i> <b>{{dispute.reason}}</b>
+                    {% endif %}
+                  </a></td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+    </div>
+  </body>
+</html>
+{% endautoescape %}

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <head>
+    <!-- [START css] -->
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css">
+    <!-- [END css] -->
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        background-color: #f5f5f5;
+      }
+      blockquote {
+        margin-bottom: 10px;
+        border-left-color: #bbb;
+      }
+      form {
+        margin-top: 10px;
+      }
+      .form-signin input[type="text"] {
+        font-size: 16px;
+        height: auto;
+        margin-bottom: 15px;
+        padding: 7px 9px;
+      }
+      .row {
+        margin-left: 0px;
+        margin-top: 10px;
+        overflow: scroll;
+      }
+      .tag {
+        background-color: gray;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+      }
+      .link-container {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+
+  <script>
+    /**
+     * Payment methods accepted by your gateway
+     *
+     * @todo confirm support for both payment methods with your gateway
+     */
+    var allowedPaymentMethods = ['CARD'];
+
+    /**
+     * Card networks supported by your site and your gateway
+     *
+     * @see {@link https://developers.google.com/pay/api/web/reference/object#CardRequirements|CardRequirements}
+     * @todo confirm card networks supported by your site and gateway
+     */
+    var allowedCardNetworks = ['AMEX', 'DISCOVER', 'JCB', 'MASTERCARD', 'VISA'];
+
+    /**
+     * Identify your gateway and your site's gateway merchant identifier
+     *
+     * The Google Pay API response will return an encrypted payment method capable of
+     * being charged by a supported gateway after shopper authorization
+     *
+     * @todo check with your gateway on the parameters to pass
+     * @see {@link https://developers.google.com/pay/api/web/reference/object#Gateway|PaymentMethodTokenizationParameters}
+     */
+    var tokenizationParameters = {
+      tokenizationType: 'PAYMENT_GATEWAY',
+      parameters: {
+        'gateway': 'stripe',
+        'stripe:version': 3,
+        'stripe:publishableKey': 'pk_test_YnmE6QclhMF5vhQvmbEi4lxs'
+      }
+    }
+
+    /**
+     * Initialize a Google Pay API client
+     *
+     * @returns {google.payments.api.PaymentsClient} Google Pay API client
+     */
+    function getGooglePaymentsClient() {
+      return (new google.payments.api.PaymentsClient({environment: 'TEST'}));
+    }
+
+    /**
+     * Initialize Google PaymentsClient after Google-hosted JavaScript has loaded
+     */
+    function onGooglePayLoaded() {
+      var paymentsClient = getGooglePaymentsClient();
+      paymentsClient.isReadyToPay({allowedPaymentMethods: allowedPaymentMethods})
+          .then(function(response) {
+            if (response.result) {
+              addGooglePayButton();
+              // prefetchGooglePaymentData();
+            }
+          })
+          .catch(function(err) {
+            // show error in developer console for debugging
+            console.error(err);
+          });
+    }
+
+    /**
+     * Add a Google Pay purchase button alongside an existing checkout button
+     *
+     * @see {@link https://developers.google.com/pay/api/web/reference/object#ButtonOptions|Button options}
+     * @see {@link https://developers.google.com/pay/api/web/guides/brand-guidelines|Google Pay brand guidelines}
+     */
+    function addGooglePayButton() {
+      var paymentsClient = getGooglePaymentsClient();
+      var button = paymentsClient.createButton({onClick:onGooglePaymentButtonClicked, buttonColor: 'white'});
+      var elements = document.getElementsByClassName('row');
+        for (var elem in elements) {
+            console.log(elem, elements[elem]);
+            elements[elem].appendChild(button);
+        }
+    }
+
+    /**
+     * Configure support for the Google Pay API
+     *
+     * @see {@link https://developers.google.com/pay/api/web/reference/object#PaymentDataRequest|PaymentDataRequest}
+     * @returns {object} PaymentDataRequest fields
+     */
+    function getGooglePaymentDataConfiguration() {
+      return {
+        // @todo a merchant ID is available for a production environment after approval by Google
+        // @see {@link https://developers.google.com/pay/api/web/guides/test-and-deploy/integration-checklist|Integration checklist}
+        merchantId: '01234567890123456789',
+        paymentMethodTokenizationParameters: tokenizationParameters,
+        allowedPaymentMethods: allowedPaymentMethods,
+        cardRequirements: {
+          allowedCardNetworks: allowedCardNetworks
+        }
+      };
+    }
+
+    /**
+     * Provide Google Pay API with a payment amount, currency, and amount status
+     *
+     * @see {@link https://developers.google.com/pay/api/web/reference/object#TransactionInfo|TransactionInfo}
+     * @returns {object} transaction info, suitable for use as transactionInfo property of PaymentDataRequest
+     */
+    function getGoogleTransactionInfo() {
+      return {
+        currencyCode: 'USD',
+        totalPriceStatus: 'FINAL',
+        // set to cart total
+        totalPrice: '0.10'
+      };
+    }
+
+    /**
+     * Prefetch payment data to improve performance
+     */
+    function prefetchGooglePaymentData() {
+      var paymentDataRequest = getGooglePaymentDataConfiguration();
+      // transactionInfo must be set but does not affect cache
+      paymentDataRequest.transactionInfo = {
+        totalPriceStatus: 'NOT_CURRENTLY_KNOWN',
+        currencyCode: 'USD'
+      };
+      var paymentsClient = getGooglePaymentsClient();
+      paymentsClient.prefetchPaymentData(paymentDataRequest);
+    }
+
+    /**
+     * Show Google Pay chooser when Google Pay purchase button is clicked
+     */
+    function onGooglePaymentButtonClicked() {
+      var paymentDataRequest = getGooglePaymentDataConfiguration();
+      paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+      paymentDataRequest.emailRequired = true;
+
+      var paymentsClient = getGooglePaymentsClient();
+      paymentsClient.loadPaymentData(paymentDataRequest)
+          .then(function(paymentData) {
+            // handle the response
+            processPayment(paymentData);
+          })
+          .catch(function(err) {
+            // show error in developer console for debugging
+            console.error(err);
+          });
+    }
+
+    /**
+     * Process payment data returned by the Google Pay API
+     *
+     * @param {object} paymentData response from Google Pay API after shopper approves payment
+     * @see {@link https://developers.google.com/pay/api/web/reference/object#PaymentData|PaymentData object reference}
+     */
+    function processPayment(paymentData) {
+      // show returned data in developer console for debugging
+      console.log(paymentData);
+      var token = JSON.parse(paymentData.paymentMethodToken.token).id;
+        console.log(token);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/charge', true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send("stripeToken="+token);
+      // @todo pass payment data response to gateway to process payment
+    }
+    </script>
+
+    <script async
+      src="https://pay.google.com/gp/p/js/pay.js"
+            onload="onGooglePayLoaded()">
+
+    </script>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="#">Stripe Demo</a>
+        </div>
+      </div>
+    </div>
+        <div>
+        <a href="/admin">Transactions and Disputes</a>
+    </div>
+    <div class="container">
+      {% for item in items %}
+      <div class="row">
+        <blockquote>{{ item.name }}</blockquote>
+        <div>
+            <span>${{(item.cost|string)[:-2]}}.{{(item.cost|string)[-2:]}}</span>
+        </div>
+      </div>
+      <form action="/charge" method="POST">
+        <input type="hidden" value="{{item.key.urlsafe()}}" name="item">
+        <script
+          src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+          data-key="pk_test_YnmE6QclhMF5vhQvmbEi4lxs"
+          data-amount="{{item.cost}}"
+          data-name="{{item.name}}"
+          data-description="Example charge"
+          data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+          data-locale="auto">
+        </script>
+      </form>
+      <br>
+      {% endfor %}
+    </div>
+  </body>
+</html>
+{% endautoescape %}

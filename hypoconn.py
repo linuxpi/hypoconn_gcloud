@@ -115,7 +115,6 @@ class SaveAnnotationPage(webapp2.RequestHandler):
             })
         )
 
-
     def post(self):
         id = self.request.get('id')
         try: 
