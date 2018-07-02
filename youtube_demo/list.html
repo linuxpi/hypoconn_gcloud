@@ -16,7 +16,7 @@
         margin-top: 50px;
         overflow: hidden;
         display: inline-block;
-        max-height: 240px;
+        max-height: 180px;
       }
       .user-back-img {
         max-height: 300px;
@@ -53,6 +53,9 @@
       }
       .apps-container img {
         margin: 0 7px 0 0;
+      }
+      .video-title {
+        font-size: 24px;
       }
     </style>
     <!--<script type="application/javascript">-->
@@ -99,11 +102,11 @@
       <div class="row">
         {% set data = item.contentDetails %}
           {% if data.upload %}
-            <iframe class="video-player" width="320" height="240"
+            <iframe class="video-player" height="180"
                     src="https://www.youtube.com/embed/{{data.upload.videoId}}">
             </iframe>
             <div class="video-detail">
-              <h3><span>{{item.snippet.title}}</span></h3>
+              <span class="video-title">{{item.snippet.title}}</span>
               <p>{{item.snippet.publishedAt.split('T')[0] }}</p>
               <p>{{item.snippet.description}}</p>
             </div>
