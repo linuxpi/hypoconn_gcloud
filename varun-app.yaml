@@ -1,6 +1,7 @@
 runtime: python27
 api_version: 1
 threadsafe: true
+service: varun
 
 # [START handlers]
 handlers:
@@ -12,7 +13,8 @@ handlers:
   static_dir: bootstrap
 
 - url: /.*
-  script: stripe_demo.application
+  script: dispute_demo.application
+  login: required
 # [END handlers]
 
 # [START libraries]

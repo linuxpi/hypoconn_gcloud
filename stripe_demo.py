@@ -1,8 +1,11 @@
 import os
 import json
+import time
+
 import webapp2
 import jinja2
 import stripe
+import datetime
 
 from google.appengine.ext import ndb
 
@@ -57,20 +60,13 @@ class ChargePage(webapp2.RequestHandler):
 
     def post(self):
         token = self.request.get('stripeToken')
-        customer = stripe.Customer.create(
-            card=token,
-        )
-        print customer.__dict__
         # item = ndb.Key(urlsafe=self.request.get('item')).get()
-        print token, 'token'
-        # charge = stripe.Charge.create(
-        #     amount=50,
-        #     description='test',
-        #     source=token,
-        #     currency='usd',
-        #     capture=False
-        # )
-        # print charge.id
+        charge = stripe.Charge.create(
+            amount=50,
+            description='test',
+            source=token,
+            currency='usd',
+        )
         # transaction = Transaction(charge_id=charge.id)
         # transaction.put()
         self.redirect('/')
@@ -79,6 +75,7 @@ class ChargePage(webapp2.RequestHandler):
 class DisputeHook(webapp2.RequestHandler):
 
     def post(self):
+        print self.request.body
         event = json.loads(self.request.body)
         dispute_id = event['data']['object']['id']
         dispute = Dispute.query(Dispute.dispute_id == dispute_id).get()
